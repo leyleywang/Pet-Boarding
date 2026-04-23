@@ -9,11 +9,13 @@
     </main>
     
     <BottomNav />
+    <Toast />
   </div>
 </template>
 
 <script setup>
 import BottomNav from './components/BottomNav.vue'
+import Toast from './components/Toast.vue'
 </script>
 
 <style scoped>

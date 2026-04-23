@@ -2,7 +2,10 @@
   <div class="home-page">
     <header class="page-header">
       <div class="header-content">
-        <h1 class="page-title">🐾 Pet Boarding</h1>
+        <div class="logo-section">
+          <Icons name="paw" :size="32" fill="currentColor" class="logo-icon" />
+          <h1 class="page-title">Pet Boarding</h1>
+        </div>
         <p class="page-subtitle">为您的爱宠找到温馨的寄养之家</p>
       </div>
     </header>
@@ -10,7 +13,10 @@
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">靠谱寄养家庭推荐</h2>
-        <span class="section-badge">已实名认证</span>
+        <span class="section-badge">
+          <Icons name="check" :size="12" />
+          已实名认证
+        </span>
       </div>
       
       <div class="family-list">
@@ -22,22 +28,26 @@
         >
           <div class="family-header">
             <div class="family-avatar avatar">
-              <span class="avatar-placeholder">{{ family.avatar }}</span>
+              <Icons :name="getFamilyIcon(family)" :size="28" class="avatar-icon" fill="currentColor" />
             </div>
             <div class="family-info">
               <div class="family-name-row">
                 <h3 class="family-name">{{ family.name }}</h3>
                 <span v-if="family.verified" class="verified-badge">
-                  ✓ 已认证
+                  <Icons name="check" :size="12" />
+                  已认证
                 </span>
               </div>
               <div class="family-meta">
                 <div class="rating">
-                  <span class="rating-star">★</span>
+                  <Icons name="star" :size="14" fill="var(--warning)" class="rating-star" />
                   <span class="rating-value">{{ family.rating }}</span>
                   <span class="review-count">({{ family.reviewCount }}条评价)</span>
                 </div>
-                <span class="distance">{{ family.distance }}</span>
+                <span class="distance">
+                  <Icons name="location" :size="12" class="distance-icon" />
+                  {{ family.distance }}
+                </span>
               </div>
             </div>
           </div>
@@ -46,6 +56,7 @@
           
           <div class="family-tags">
             <span v-for="tag in family.petTypes" :key="tag" class="tag tag-default">
+              <Icons :name="getPetTagIcon(tag)" :size="12" />
               {{ tag }}
             </span>
           </div>
@@ -54,13 +65,15 @@
             <div class="price-info">
               <span class="price-label">价格</span>
               <span class="price-value">
+                <Icons name="dollar" :size="16" />
                 ¥{{ family.price.dog > 0 ? family.price.dog : family.price.cat }}
                 <span class="price-unit">/天</span>
               </span>
             </div>
             <div class="family-actions">
               <span v-if="family.hasLiveStream" class="live-badge">
-                📹 支持视频
+                <Icons name="video" :size="14" />
+                支持视频
               </span>
             </div>
           </div>
@@ -69,12 +82,19 @@
             <h4 class="reviews-title">用户评价</h4>
             <div class="review-item">
               <div class="review-header">
-                <span class="review-avatar">{{ family.reviews[0].avatar }}</span>
+                <div class="review-avatar">
+                  <Icons name="user" :size="16" />
+                </div>
                 <span class="review-user">{{ family.reviews[0].user }}</span>
                 <div class="review-rating">
-                  <span v-for="n in 5" :key="n" class="rating-star">
-                    {{ n <= family.reviews[0].rating ? '★' : '☆' }}
-                  </span>
+                  <Icons 
+                    v-for="n in 5" 
+                    :key="n" 
+                    name="star" 
+                    :size="12" 
+                    :fill="n <= family.reviews[0].rating ? 'var(--warning)' : 'var(--border-color)'"
+                    class="rating-star"
+                  />
                 </div>
               </div>
               <p class="review-content">{{ family.reviews[0].content }}</p>
@@ -97,9 +117,39 @@
 import { ref } from 'vue'
 import { fosterFamilies } from '../data/mockData.js'
 import OrderModal from '../components/OrderModal.vue'
+import Icons from '../components/Icons.vue'
+import { useOrders } from '../composables/useOrders.js'
+import { useToast } from '../composables/useToast.js'
+
+const { addOrder } = useOrders()
+const { success } = useToast()
 
 const isOrderModalOpen = ref(false)
 const selectedFamily = ref(null)
+
+const getFamilyIcon = (family) => {
+  if (family.petTypes.includes('狗') && family.petTypes.includes('猫')) {
+    return 'paw'
+  } else if (family.petTypes.includes('狗')) {
+    return 'dog'
+  } else if (family.petTypes.includes('猫')) {
+    return 'cat'
+  }
+  return 'paw'
+}
+
+const getPetTagIcon = (type) => {
+  switch (type) {
+    case '狗':
+      return 'dog'
+    case '猫':
+      return 'cat'
+    case '小型宠物':
+      return 'hamster'
+    default:
+      return 'paw'
+  }
+}
 
 const openOrderModal = (family) => {
   selectedFamily.value = family
@@ -112,8 +162,9 @@ const closeOrderModal = () => {
 }
 
 const handleOrderConfirm = (orderData) => {
-  console.log('订单确认:', orderData)
-  alert('下单成功！您可以在"我的"页面查看订单详情。')
+  const newOrder = addOrder(orderData)
+  console.log('订单确认:', newOrder)
+  success('下单成功！您可以在"我的"页面查看订单详情。')
   closeOrderModal()
 }
 </script>
@@ -132,10 +183,21 @@ const handleOrderConfirm = (orderData) => {
   text-align: center;
 }
 
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
+.logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   margin-bottom: 8px;
+}
+
+.logo-icon {
+  color: var(--text-primary);
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
   background: linear-gradient(90deg, #ffffff 0%, #888888 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -164,6 +226,9 @@ const handleOrderConfirm = (orderData) => {
 }
 
 .section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 12px;
   padding: 4px 10px;
   background-color: rgba(16, 185, 129, 0.1);
@@ -199,10 +264,13 @@ const handleOrderConfirm = (orderData) => {
   width: 56px;
   height: 56px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.family-avatar .avatar-placeholder {
-  font-size: 28px;
+.avatar-icon {
+  color: var(--text-secondary);
 }
 
 .family-info {
@@ -239,6 +307,10 @@ const handleOrderConfirm = (orderData) => {
   gap: 4px;
 }
 
+.rating-star {
+  flex-shrink: 0;
+}
+
 .rating-value {
   font-weight: 600;
   font-size: 14px;
@@ -252,6 +324,13 @@ const handleOrderConfirm = (orderData) => {
 .distance {
   font-size: 12px;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.distance-icon {
+  flex-shrink: 0;
 }
 
 .family-description {
@@ -266,6 +345,12 @@ const handleOrderConfirm = (orderData) => {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .family-footer {
@@ -288,6 +373,9 @@ const handleOrderConfirm = (orderData) => {
 }
 
 .price-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 20px;
   font-weight: 700;
 }
@@ -299,6 +387,9 @@ const handleOrderConfirm = (orderData) => {
 }
 
 .live-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 12px;
   color: var(--text-secondary);
 }
@@ -330,7 +421,12 @@ const handleOrderConfirm = (orderData) => {
 }
 
 .review-avatar {
-  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
 }
 
 .review-user {
@@ -340,10 +436,9 @@ const handleOrderConfirm = (orderData) => {
 
 .review-rating {
   margin-left: auto;
-}
-
-.review-rating .rating-star {
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .review-content {

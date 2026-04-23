@@ -3,16 +3,20 @@
     <header class="profile-header">
       <div class="profile-info">
         <div class="profile-avatar avatar">
-          <span class="avatar-placeholder">{{ userInfo.avatar }}</span>
+          <Icons name="user" :size="36" class="avatar-icon" fill="currentColor" />
         </div>
         <div class="profile-details">
           <div class="profile-name-row">
             <h1 class="profile-name">{{ userInfo.name }}</h1>
             <span v-if="userInfo.verified" class="verified-badge">
-              ✓ 已实名认证
+              <Icons name="check" :size="12" />
+              已实名认证
             </span>
           </div>
-          <p class="profile-phone">{{ userInfo.phone }}</p>
+          <p class="profile-phone">
+            <Icons name="phone" :size="14" class="phone-icon" />
+            {{ userInfo.phone }}
+          </p>
         </div>
       </div>
       
@@ -23,7 +27,7 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <span class="stat-value">{{ userInfo.orderCount }}</span>
+          <span class="stat-value">{{ allOrders.length }}</span>
           <span class="stat-label">寄养订单</span>
         </div>
       </div>
@@ -31,7 +35,10 @@
 
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">异常提醒</h2>
+        <h2 class="section-title">
+          <Icons name="bell" :size="18" class="section-icon" />
+          异常提醒
+        </h2>
         <span v-if="unreadAlerts.length > 0" class="alert-badge">
           {{ unreadAlerts.length }} 条未读
         </span>
@@ -47,7 +54,7 @@
         >
           <div class="alert-header">
             <div class="alert-icon">
-              {{ getAlertIcon(alert.type) }}
+              <Icons :name="getAlertIcon(alert.type)" :size="24" :fill="getAlertColor(alert.type)" />
             </div>
             <div class="alert-info">
               <div class="alert-title-row">
@@ -65,7 +72,9 @@
       </div>
       
       <div v-else class="empty-state small">
-        <div class="empty-icon">🔔</div>
+        <div class="empty-icon-wrapper">
+          <Icons name="bell" :size="48" fill="var(--text-tertiary)" />
+        </div>
         <h3 class="empty-title">暂无异常提醒</h3>
         <p class="empty-description">您的宠物状态一切正常</p>
       </div>
@@ -73,24 +82,28 @@
 
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">寄养订单</h2>
+        <h2 class="section-title">
+          <Icons name="calendar" :size="18" class="section-icon" />
+          寄养订单
+        </h2>
       </div>
       
-      <div v-if="orders.length > 0" class="orders-list">
+      <div v-if="allOrders.length > 0" class="orders-list">
         <div 
-          v-for="order in orders" 
+          v-for="order in allOrders" 
           :key="order.id"
           class="order-item card"
         >
           <div class="order-header">
             <div class="order-family">
-              <div class="order-family-avatar">
-                {{ getFamilyAvatar(order.familyId) }}
+              <div class="order-family-avatar avatar">
+                <Icons :name="getOrderFamilyIcon(order)" :size="24" class="avatar-icon" fill="currentColor" />
               </div>
               <div>
                 <h3 class="order-family-name">{{ order.familyName }}</h3>
                 <p class="order-pet-info">
-                  {{ getPetAvatar(order.petType) }} {{ order.petName }}
+                  <Icons :name="getPetTagIcon(order.petType)" :size="14" class="pet-type-icon" />
+                  {{ order.petName }}
                 </p>
               </div>
             </div>
@@ -101,21 +114,30 @@
           
           <div class="order-details">
             <div class="detail-row">
-              <span class="detail-label">寄养时间</span>
+              <span class="detail-label">
+                <Icons name="clock" :size="12" class="detail-icon" />
+                寄养时间
+              </span>
               <span class="detail-value">{{ order.startDate }} 至 {{ order.endDate }}</span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">寄养天数</span>
+              <span class="detail-label">
+                <Icons name="calendar" :size="12" class="detail-icon" />
+                寄养天数
+              </span>
               <span class="detail-value">{{ order.days }} 天</span>
             </div>
             <div class="detail-row price-row">
-              <span class="detail-label">订单金额</span>
+              <span class="detail-label">
+                <Icons name="dollar" :size="12" class="detail-icon" />
+                订单金额
+              </span>
               <span class="detail-value price">¥{{ order.price }}</span>
             </div>
           </div>
           
           <div v-if="order.hasAlert" class="order-alert">
-            <span class="alert-icon-small">⚠️</span>
+            <Icons name="alert" :size="16" fill="var(--warning)" />
             <span class="alert-text">{{ order.alertMessage }}</span>
           </div>
           
@@ -123,16 +145,21 @@
             <button 
               v-if="order.status === 'active'" 
               class="action-btn primary"
+              @click="goToVideo(order)"
             >
-              查看实时视频
+              <Icons name="video" :size="14" />
+              查看视频
             </button>
             <button 
               v-if="order.status === 'completed'"
               class="action-btn secondary"
+              @click="goToHome"
             >
+              <Icons name="repeat" :size="14" />
               再次寄养
             </button>
-            <button class="action-btn text">
+            <button class="action-btn text" @click="openOrderDetail(order)">
+              <Icons name="info" :size="14" />
               订单详情
             </button>
           </div>
@@ -140,7 +167,9 @@
       </div>
       
       <div v-else class="empty-state small">
-        <div class="empty-icon">📋</div>
+        <div class="empty-icon-wrapper">
+          <Icons name="calendar" :size="48" fill="var(--text-tertiary)" />
+        </div>
         <h3 class="empty-title">暂无寄养订单</h3>
         <p class="empty-description">去首页挑选一个寄养家庭吧</p>
       </div>
@@ -149,36 +178,62 @@
     <section class="section">
       <div class="settings-list">
         <div class="settings-item card">
-          <span class="settings-icon">🐾</span>
+          <Icons name="paw" :size="20" class="settings-icon" fill="currentColor" />
           <span class="settings-label">我的宠物</span>
-          <span class="settings-arrow">›</span>
+          <Icons name="chevron-right" :size="16" fill="var(--text-tertiary)" />
         </div>
         <div class="settings-item card">
-          <span class="settings-icon">⚙️</span>
+          <Icons name="settings" :size="20" class="settings-icon" fill="currentColor" />
           <span class="settings-label">账号设置</span>
-          <span class="settings-arrow">›</span>
+          <Icons name="chevron-right" :size="16" fill="var(--text-tertiary)" />
         </div>
         <div class="settings-item card">
-          <span class="settings-icon">🔔</span>
+          <Icons name="bell" :size="20" class="settings-icon" fill="currentColor" />
           <span class="settings-label">通知设置</span>
-          <span class="settings-arrow">›</span>
+          <Icons name="chevron-right" :size="16" fill="var(--text-tertiary)" />
         </div>
         <div class="settings-item card">
-          <span class="settings-icon">❓</span>
+          <Icons name="help" :size="20" class="settings-icon" fill="currentColor" />
           <span class="settings-label">帮助中心</span>
-          <span class="settings-arrow">›</span>
+          <Icons name="chevron-right" :size="16" fill="var(--text-tertiary)" />
         </div>
       </div>
     </section>
+
+    <OrderDetail
+      :is-open="isDetailOpen"
+      :order="selectedOrder"
+      :foster-family="getFosterFamily(selectedOrder)"
+      @close="closeDetail"
+      @go-to-video="goToVideo"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { userInfo, alerts, orders, fosterFamilies } from '../data/mockData.js'
+import { useOrders } from '../composables/useOrders.js'
+import Icons from '../components/Icons.vue'
+import OrderDetail from '../components/OrderDetail.vue'
+
+const router = useRouter()
+const { orders: persistedOrders } = useOrders()
 
 const alertsList = ref(alerts)
-const ordersList = ref(orders)
+const isDetailOpen = ref(false)
+const selectedOrder = ref(null)
+
+const allOrders = computed(() => {
+  const mockIds = orders.map(o => o.id)
+  const filteredPersisted = persistedOrders.value.filter(o => !mockIds.includes(o.id))
+  return [...orders, ...filteredPersisted].sort((a, b) => {
+    if (a.status === 'active' && b.status !== 'active') return -1
+    if (b.status === 'active' && a.status !== 'active') return 1
+    return new Date(b.startDate) - new Date(a.startDate)
+  })
+})
 
 const unreadAlerts = computed(() => {
   return alertsList.value.filter(a => !a.read)
@@ -187,11 +242,22 @@ const unreadAlerts = computed(() => {
 const getAlertIcon = (type) => {
   switch (type) {
     case 'health':
-      return '🩺'
+      return 'alert'
     case 'activity':
-      return '🐾'
+      return 'paw'
     default:
-      return '🔔'
+      return 'bell'
+  }
+}
+
+const getAlertColor = (type) => {
+  switch (type) {
+    case 'health':
+      return 'var(--danger)'
+    case 'activity':
+      return 'var(--warning)'
+    default:
+      return 'var(--text-secondary)'
   }
 }
 
@@ -219,22 +285,35 @@ const markAsRead = (alert) => {
   }
 }
 
-const getFamilyAvatar = (familyId) => {
-  const family = fosterFamilies.find(f => f.id === familyId)
-  return family?.avatar || '🏠'
+const getOrderFamilyIcon = (order) => {
+  const family = fosterFamilies.find(f => f.id === order.familyId)
+  if (!family) return 'paw'
+  if (family.petTypes.includes('狗') && family.petTypes.includes('猫')) {
+    return 'paw'
+  } else if (family.petTypes.includes('狗')) {
+    return 'dog'
+  } else if (family.petTypes.includes('猫')) {
+    return 'cat'
+  }
+  return 'paw'
 }
 
-const getPetAvatar = (type) => {
+const getPetTagIcon = (type) => {
   switch (type) {
     case '狗':
-      return '🐕'
+      return 'dog'
     case '猫':
-      return '🐱'
+      return 'cat'
     case '小型宠物':
-      return '🐹'
+      return 'hamster'
     default:
-      return '🐾'
+      return 'paw'
   }
+}
+
+const getFosterFamily = (order) => {
+  if (!order) return null
+  return fosterFamilies.find(f => f.id === order.familyId)
 }
 
 const getStatusText = (status) => {
@@ -260,6 +339,25 @@ const getStatusClass = (status) => {
       return 'status-default'
   }
 }
+
+const openOrderDetail = (order) => {
+  selectedOrder.value = order
+  isDetailOpen.value = true
+}
+
+const closeDetail = () => {
+  isDetailOpen.value = false
+  selectedOrder.value = null
+}
+
+const goToVideo = (order) => {
+  router.push('/family')
+  closeDetail()
+}
+
+const goToHome = () => {
+  router.push('/')
+}
 </script>
 
 <style scoped>
@@ -283,10 +381,13 @@ const getStatusClass = (status) => {
   width: 72px;
   height: 72px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.profile-avatar .avatar-placeholder {
-  font-size: 36px;
+.avatar-icon {
+  color: var(--text-secondary);
 }
 
 .profile-details {
@@ -313,6 +414,13 @@ const getStatusClass = (status) => {
 .profile-phone {
   font-size: 14px;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.phone-icon {
+  flex-shrink: 0;
 }
 
 .profile-stats {
@@ -363,6 +471,13 @@ const getStatusClass = (status) => {
 .section-title {
   font-size: 16px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-icon {
+  flex-shrink: 0;
 }
 
 .alert-badge {
@@ -399,7 +514,6 @@ const getStatusClass = (status) => {
 }
 
 .alert-icon {
-  font-size: 28px;
   flex-shrink: 0;
 }
 
@@ -448,6 +562,13 @@ const getStatusClass = (status) => {
 
 .empty-state.small {
   padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-icon-wrapper {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
 }
 
 .empty-state.small .empty-icon {
@@ -478,7 +599,12 @@ const getStatusClass = (status) => {
 }
 
 .order-family-avatar {
-  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .order-family-name {
@@ -493,6 +619,10 @@ const getStatusClass = (status) => {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.pet-type-icon {
+  flex-shrink: 0;
 }
 
 .order-status {
@@ -536,6 +666,13 @@ const getStatusClass = (status) => {
 .detail-label {
   font-size: 13px;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-icon {
+  flex-shrink: 0;
 }
 
 .detail-value {
@@ -564,10 +701,6 @@ const getStatusClass = (status) => {
   margin-bottom: 12px;
 }
 
-.alert-icon-small {
-  font-size: 16px;
-}
-
 .alert-text {
   font-size: 13px;
   color: var(--warning);
@@ -582,6 +715,7 @@ const getStatusClass = (status) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   padding: 10px 16px;
   border-radius: 10px;
   font-size: 13px;
@@ -640,7 +774,7 @@ const getStatusClass = (status) => {
 }
 
 .settings-icon {
-  font-size: 20px;
+  color: var(--text-secondary);
 }
 
 .settings-label {
