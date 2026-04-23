@@ -8,20 +8,25 @@
             
             <div class="modal-header">
               <h2 class="modal-title">确认寄养订单</h2>
-              <button class="modal-close" @click="handleClose">✕</button>
+              <button class="modal-close" @click="handleClose">
+                <Icons name="close" :size="18" />
+              </button>
             </div>
             
             <div class="family-summary">
               <div class="family-summary-header">
                 <div class="family-summary-avatar avatar">
-                  <span class="avatar-placeholder">{{ selectedFamily.avatar }}</span>
+                  <Icons :name="getFamilyIcon(selectedFamily)" :size="24" class="avatar-icon" fill="currentColor" />
                 </div>
                 <div class="family-summary-info">
                   <h3 class="family-summary-name">{{ selectedFamily.name }}</h3>
                   <div class="family-summary-meta">
-                    <span class="verified-badge">✓ 已认证</span>
+                    <span class="verified-badge">
+                      <Icons name="check" :size="12" />
+                      已认证
+                    </span>
                     <div class="rating">
-                      <span class="rating-star">★</span>
+                      <Icons name="star" :size="14" fill="var(--warning)" class="rating-star" />
                       <span class="rating-value">{{ selectedFamily.rating }}</span>
                     </div>
                   </div>
@@ -52,7 +57,8 @@
                     :class="{ active: formData.petType === type }"
                     @click="formData.petType = type"
                   >
-                    {{ getPetTypeIcon(type) }} {{ type }}
+                    <Icons :name="getPetTypeIcon(type)" :size="16" />
+                    <span>{{ type }}</span>
                   </button>
                 </div>
               </div>
@@ -98,7 +104,8 @@
                   :key="amenity"
                   class="amenity-tag"
                 >
-                  ✓ {{ amenity }}
+                  <Icons name="check" :size="12" />
+                  <span>{{ amenity }}</span>
                 </span>
               </div>
             </div>
@@ -112,7 +119,10 @@
               </div>
               <div class="price-row price-total">
                 <span class="price-label">总计</span>
-                <span class="price-amount">¥{{ totalPrice }}</span>
+                <span class="price-amount">
+                  <Icons name="dollar" :size="18" />
+                  ¥{{ totalPrice }}
+                </span>
               </div>
             </div>
             
@@ -136,7 +146,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
+import Icons from './Icons.vue'
 
 const props = defineProps({
   isOpen: {
@@ -192,6 +203,31 @@ const isFormValid = computed(() => {
          days.value > 0
 })
 
+const getFamilyIcon = (family) => {
+  if (!family) return 'paw'
+  if (family.petTypes.includes('狗') && family.petTypes.includes('猫')) {
+    return 'paw'
+  } else if (family.petTypes.includes('狗')) {
+    return 'dog'
+  } else if (family.petTypes.includes('猫')) {
+    return 'cat'
+  }
+  return 'paw'
+}
+
+const getPetTypeIcon = (type) => {
+  switch (type) {
+    case '狗':
+      return 'dog'
+    case '猫':
+      return 'cat'
+    case '小型宠物':
+      return 'hamster'
+    default:
+      return 'paw'
+  }
+}
+
 const calculateDays = () => {
   if (!formData.value.startDate || !formData.value.endDate) {
     days.value = 0
@@ -204,19 +240,6 @@ const calculateDays = () => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   
   days.value = diffDays > 0 ? diffDays : 0
-}
-
-const getPetTypeIcon = (type) => {
-  switch (type) {
-    case '狗':
-      return '🐕'
-    case '猫':
-      return '🐱'
-    case '小型宠物':
-      return '🐹'
-    default:
-      return '🐾'
-  }
 }
 
 const handleClose = () => {
@@ -289,7 +312,6 @@ watch(() => props.isOpen, (newVal) => {
   background-color: var(--bg-tertiary);
   border: none;
   color: var(--text-secondary);
-  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -317,10 +339,14 @@ watch(() => props.isOpen, (newVal) => {
 .family-summary-avatar {
   width: 48px;
   height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.family-summary-avatar .avatar-placeholder {
-  font-size: 24px;
+.avatar-icon {
+  color: var(--text-secondary);
 }
 
 .family-summary-info {
@@ -338,6 +364,27 @@ watch(() => props.isOpen, (newVal) => {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating-star {
+  flex-shrink: 0;
+}
+
+.rating-value {
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .form-section {
@@ -508,6 +555,9 @@ watch(() => props.isOpen, (newVal) => {
 .price-total .price-amount {
   font-size: 20px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .modal-actions {

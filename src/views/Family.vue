@@ -1,7 +1,10 @@
 <template>
   <div class="family-page">
     <header class="page-header">
-      <h1 class="page-title">📹 实时视频</h1>
+      <h1 class="page-title">
+        <Icons name="video" :size="28" class="title-icon" />
+        实时视频
+      </h1>
       <p class="page-subtitle">随时查看宠物寄养状态</p>
     </header>
 
@@ -25,7 +28,7 @@
         >
           <div class="stream-thumbnail">
             <div class="thumbnail-placeholder">
-              <span class="thumbnail-icon">{{ stream.thumbnail }}</span>
+              <Icons name="image" :size="64" fill="var(--text-tertiary)" />
             </div>
             <div class="stream-overlay">
               <span class="stream-live-badge">
@@ -33,11 +36,12 @@
                 LIVE
               </span>
               <span class="stream-viewers">
-                👁 {{ stream.viewers }} 人观看
+                <Icons name="eye" :size="14" />
+                {{ stream.viewers }} 人观看
               </span>
             </div>
             <div class="stream-play">
-              <span class="play-icon">▶</span>
+              <Icons name="play" :size="24" fill="var(--bg-primary)" class="play-icon" />
             </div>
           </div>
           <div class="stream-info">
@@ -50,7 +54,10 @@
 
     <section v-if="activeStreams.length > 0" class="section">
       <div class="section-header">
-        <h2 class="section-title">我的宠物监控</h2>
+        <h2 class="section-title">
+          <Icons name="paw" :size="18" class="section-icon" />
+          我的宠物监控
+        </h2>
       </div>
       
       <div class="my-pets-list">
@@ -61,7 +68,9 @@
         >
           <div class="pet-stream-header">
             <div class="pet-info">
-              <span class="pet-avatar">{{ getPetAvatar(order.petType) }}</span>
+              <div class="pet-avatar avatar">
+                <Icons :name="getPetIcon(order.petType)" :size="20" class="avatar-icon" fill="currentColor" />
+              </div>
               <div>
                 <h4 class="pet-name">{{ order.petName }}</h4>
                 <p class="pet-location">{{ order.familyName }}</p>
@@ -70,9 +79,9 @@
             <span class="status-badge status-active">寄养中</span>
           </div>
           
-          <div class="pet-stream-preview">
+          <div class="pet-stream-preview" @click="viewPetStream(order)">
             <div class="preview-placeholder">
-              <div class="preview-icon">📹</div>
+              <Icons name="video" :size="40" fill="var(--text-tertiary)" />
               <p class="preview-text">点击查看实时视频</p>
             </div>
             <div class="preview-overlay">
@@ -85,11 +94,11 @@
           
           <div class="pet-stream-actions">
             <button class="action-btn primary" @click="viewPetStream(order)">
-              <span class="action-icon">▶</span>
+              <Icons name="play" :size="14" />
               查看视频
             </button>
             <button class="action-btn secondary">
-              <span class="action-icon">💬</span>
+              <Icons name="message" :size="14" />
               联系寄养家庭
             </button>
           </div>
@@ -99,7 +108,9 @@
 
     <section v-else class="section">
       <div class="empty-state">
-        <div class="empty-icon">🎥</div>
+        <div class="empty-icon-wrapper">
+          <Icons name="video" :size="56" fill="var(--text-tertiary)" />
+        </div>
         <h3 class="empty-title">暂无寄养中的宠物</h3>
         <p class="empty-description">
           您当前没有正在进行中的寄养订单<br>
@@ -112,7 +123,9 @@
       <div v-if="isStreamModalOpen" class="stream-modal-overlay" @click.self="closeStream">
         <div class="stream-modal-content">
           <div class="stream-modal-header">
-            <button class="stream-modal-close" @click="closeStream">✕</button>
+            <button class="stream-modal-close" @click="closeStream">
+              <Icons name="close" :size="16" />
+            </button>
             <h3 class="stream-modal-title">{{ selectedStream?.title || '实时视频' }}</h3>
             <div class="stream-modal-live">
               <span class="live-dot small"></span>
@@ -122,15 +135,23 @@
           
           <div class="stream-modal-player">
             <div class="player-placeholder">
-              <div class="player-icon">📹</div>
+              <Icons name="video" :size="64" fill="rgba(255,255,255,0.2)" />
               <p class="player-text">视频直播中...</p>
               <p class="player-hint">（实际项目中将接入真实视频流）</p>
             </div>
             <div class="player-controls">
-              <button class="control-btn">⏸</button>
-              <button class="control-btn">🔊</button>
-              <button class="control-btn">📱</button>
-              <button class="control-btn">⛶</button>
+              <button class="control-btn">
+                <Icons name="pause" :size="18" />
+              </button>
+              <button class="control-btn">
+                <Icons name="volume" :size="18" />
+              </button>
+              <button class="control-btn">
+                <Icons name="phone" :size="18" />
+              </button>
+              <button class="control-btn">
+                <Icons name="expand" :size="18" />
+              </button>
             </div>
           </div>
           
@@ -153,6 +174,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { liveStreams, orders } from '../data/mockData.js'
+import Icons from '../components/Icons.vue'
 
 const isStreamModalOpen = ref(false)
 const selectedStream = ref(null)
@@ -161,16 +183,16 @@ const activeStreams = computed(() => {
   return orders.filter(order => order.status === 'active')
 })
 
-const getPetAvatar = (type) => {
+const getPetIcon = (type) => {
   switch (type) {
     case '狗':
-      return '🐕'
+      return 'dog'
     case '猫':
-      return '🐱'
+      return 'cat'
     case '小型宠物':
-      return '🐹'
+      return 'hamster'
     default:
-      return '🐾'
+      return 'paw'
   }
 }
 
@@ -205,6 +227,13 @@ const viewPetStream = (order) => {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-icon {
+  flex-shrink: 0;
 }
 
 .page-subtitle {
@@ -270,6 +299,13 @@ const viewPetStream = (order) => {
 .section-title {
   font-size: 16px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-icon {
+  flex-shrink: 0;
 }
 
 .stream-list {
@@ -297,11 +333,6 @@ const viewPetStream = (order) => {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-}
-
-.thumbnail-icon {
-  font-size: 64px;
-  opacity: 0.5;
 }
 
 .stream-overlay {
@@ -352,8 +383,6 @@ const viewPetStream = (order) => {
   height: 56px;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
-  font-size: 20px;
-  color: var(--bg-primary);
   transition: all 0.3s ease;
 }
 
@@ -401,7 +430,16 @@ const viewPetStream = (order) => {
 }
 
 .pet-avatar {
-  font-size: 32px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-icon {
+  color: var(--text-secondary);
 }
 
 .pet-name {
@@ -446,12 +484,7 @@ const viewPetStream = (order) => {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-}
-
-.preview-icon {
-  font-size: 40px;
-  margin-bottom: 8px;
-  opacity: 0.5;
+  gap: 8px;
 }
 
 .preview-text {
@@ -516,8 +549,27 @@ const viewPetStream = (order) => {
   border-color: var(--text-secondary);
 }
 
-.action-icon {
-  font-size: 16px;
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-icon-wrapper {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.empty-description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 .stream-modal-overlay {
@@ -557,11 +609,16 @@ const viewPetStream = (order) => {
   background-color: var(--bg-tertiary);
   border: none;
   color: var(--text-secondary);
-  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.stream-modal-close:hover {
+  background-color: var(--border-color);
+  color: var(--text-primary);
 }
 
 .stream-modal-title {
@@ -595,18 +652,12 @@ const viewPetStream = (order) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-.player-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-  opacity: 0.3;
+  gap: 8px;
 }
 
 .player-text {
   font-size: 16px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
 }
 
 .player-hint {
@@ -633,7 +684,6 @@ const viewPetStream = (order) => {
   background-color: rgba(255, 255, 255, 0.1);
   border: none;
   color: #fff;
-  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;

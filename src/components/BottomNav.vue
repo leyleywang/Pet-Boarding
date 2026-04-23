@@ -8,7 +8,7 @@
         class="nav-item"
         :class="{ active: isActive(item.path) }"
       >
-        <span class="nav-icon">{{ item.icon }}</span>
+        <Icons :name="item.icon" :size="22" class="nav-icon" />
         <span class="nav-label">{{ item.label }}</span>
       </router-link>
     </div>
@@ -18,13 +18,14 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import Icons from './Icons.vue'
 
 const route = useRoute()
 
 const navItems = [
-  { path: '/', label: '首页', icon: '🏠' },
-  { path: '/family', label: '寄养家庭', icon: '📹' },
-  { path: '/profile', label: '我的', icon: '👤' }
+  { path: '/', label: '首页', icon: 'home' },
+  { path: '/family', label: '寄养家庭', icon: 'video' },
+  { path: '/profile', label: '我的', icon: 'user' }
 ]
 
 const isActive = (path) => {
@@ -52,5 +53,9 @@ const isActive = (path) => {
 .nav-item.router-link-active,
 .nav-item.router-link-exact-active {
   color: var(--text-primary);
+}
+
+.nav-icon {
+  transition: transform 0.2s ease;
 }
 </style>
